@@ -168,6 +168,153 @@ define view entity ZC_ITEMOV_ESCHOEPF
 }
 ```
 
+🔹 Metadata Extension (opcional, mas recomendado)
+Define as anotações de UI (como @UI.lineItem, @UI.selectionField, @UI.facet, etc.) separadamente da view principal.
+Ajuda a manter o código modular, limpo e reutilizável.
+
+```abap
+@Metadata.layer: #CORE
+@UI.headerInfo: { typeName: 'Pedidos de compra',
+                  typeNamePlural: 'Pedidos de compra' }
+                 
+@UI.presentationVariant: [{ sortOrder: [{by: 'TotalNetAmount', direction: #DESC }] }]
+                  
+annotate entity ZC_HEADEROV_ESCHOEPF
+    with 
+{
+    
+    @UI.facet: [{
+        id: 'header',
+        label: 'Cabeçalho',
+        position: 10,
+        type: #FIELDGROUP_REFERENCE, //ou #IDENTIFICATION_REFERENCE
+        targetQualifier: 'HEADER'
+    }, {
+        id: 'items',                        // Adiciona a faceta para os itens
+        label: 'Itens da Ordem de Vendas',  // Nome da faceta
+        position: 20,                       // A posição da faceta na UI
+        type: #LINEITEM_REFERENCE,
+        targetElement: '_SalesOrderItem'    // Qualificador de campo para os itens
+    }]
+     
+    // Campos do cabeçalho da ordem de vendas
+    //@Consumption.filter.mandatory: true         
+    @UI.lineItem: [{ position: 10, label: 'Número da Ordem de Vendas' }]
+    @UI.selectionField: [{ position: 10 }]
+    @EndUserText.label: 'Pedido de compras'
+    @Consumption.valueHelpDefinition: [{ entity.name: 'I_MM_SalesOrderItemVH', entity.element: 'SalesOrder' }]
+    @UI.fieldGroup: [{ position: 10, qualifier: 'HEADER' }]  // Posição 10, agrupando no cabeçalho
+    SalesOrder;
+
+    @UI.selectionField: [{ position: 20 }]
+    @UI.lineItem: [{ position: 20 }]
+    @Consumption.valueHelpDefinition: [{ entity.name: 'I_SalesOrderType', entity.element: 'SalesOrderType' }]
+    @UI.fieldGroup: [{ position: 20, qualifier: 'HEADER' }]  // Posição 20, agrupando no cabeçalho
+    SalesOrderType;
+
+    @UI.lineItem: [{ position: 30 }]
+    @UI.fieldGroup: [{ position: 30, qualifier: 'HEADER' }]  // Posição 30, agrupando no cabeçalho
+    CreatedByUser;
+
+    @UI.lineItem: [{ position: 40 }]
+    @UI.fieldGroup: [{ position: 40, qualifier: 'HEADER' }]  // Posição 40, agrupando no cabeçalho
+    LastChangedByUser;
+
+    @UI.selectionField: [{ position: 30 }]
+    @UI.lineItem: [{ position: 50 }]
+    @Consumption.filter: { selectionType: #RANGE }
+    @UI.fieldGroup: [{ position: 50, qualifier: 'HEADER' }]  // Posição 50, agrupando no cabeçalho
+    CreationDate;
+
+    @UI.lineItem: [{ position: 60 }]
+    @UI.fieldGroup: [{ position: 60, qualifier: 'HEADER' }]  // Posição 60, agrupando no cabeçalho
+    SalesOrganization;
+
+    @UI.lineItem: [{ position: 70 }]
+    @UI.fieldGroup: [{ position: 70, qualifier: 'HEADER' }]  // Posição 70, agrupando no cabeçalho
+    DistributionChannel;
+
+    @UI.lineItem: [{ position: 80 }]
+    @UI.fieldGroup: [{ position: 80, qualifier: 'HEADER' }]  // Posição 80, agrupando no cabeçalho
+    OrganizationDivision;
+
+    @UI.lineItem: [{ position: 90 }]
+    @UI.fieldGroup: [{ position: 90, qualifier: 'HEADER' }]  // Posição 90, agrupando no cabeçalho
+    SalesGroup;
+
+    @UI.lineItem: [{ position: 100 }]
+    @UI.fieldGroup: [{ position: 100, qualifier: 'HEADER' }]  // Posição 100, agrupando no cabeçalho
+    SalesOffice;
+    
+    @UI.lineItem: [{ position: 110, criticality: 'Criticality' }]
+    @UI.fieldGroup: [{ position: 110, qualifier: 'HEADER', criticality: 'Criticality' }]  // Posição 110, agrupando no cabeçalho
+    TotalNetAmount;
+    
+    @UI.lineItem: [{ position: 120 }]
+    @UI.hidden: true
+    @UI.fieldGroup: [{ position: 120, qualifier: 'HEADER' }]  // Posição 120, agrupando no cabeçalho
+    TransactionCurrency;
+    
+    // Faceta para os itens da ordem de vendas
+    @UI.fieldGroup: [{ position: 140, qualifier: 'ITEMS' }]  // Posição 140 para os itens da ordem de vendas
+    _SalesOrderItem; // Esta é a associação que traz os itens da ordem de vendas
+    
+}
+```
+
+```abap
+@Metadata.layer: #CORE
+annotate entity ZC_ITEMOV_ESCHOEPF with
+{
+      @UI.lineItem: [{ position: 10 }]
+      SalesOrder;
+      @UI.lineItem: [{ position: 20 }]
+      SalesOrderItem;
+      @UI.lineItem: [{ position: 30 }]
+      SalesOrderItemCategory;
+      @UI.lineItem: [{ position: 40 }]
+      SalesOrderItemType;
+      @UI.lineItem: [{ position: 50 }]
+      IsReturnsItem;
+      @UI.lineItem: [{ position: 60 }]
+      CreatedByUser;
+      @UI.lineItem: [{ position: 70 }]
+      CreationDate;
+      @UI.lineItem: [{ position: 80 }]
+      CreationTime;
+      @UI.lineItem: [{ position: 90 }]
+      LastChangeDate;
+      @UI.lineItem: [{ position: 100 }]
+      Division;
+      @UI.lineItem: [{ position: 110 }]
+      Material;
+      @UI.lineItem: [{ position: 120 }]
+      Batch;
+      @UI.lineItem: [{ position: 130 }]
+      Plant;
+      @UI.lineItem: [{ position: 140 }]
+      StorageLocation;
+      @UI.lineItem: [{ position: 150 }]
+      OrderQuantity;
+      @UI.lineItem: [{ position: 160 }]
+      OrderQuantityUnit;
+      @UI.lineItem: [{ position: 170 }]
+      ItemGrossWeight;
+      @UI.lineItem: [{ position: 180 }]
+      ItemNetWeight;
+      @UI.lineItem: [{ position: 190 }]
+      ItemWeightUnit;
+      @UI.lineItem: [{ position: 200 }]
+      ItemVolume;
+      @UI.lineItem: [{ position: 210 }]
+      ItemVolumeUnit;
+      @UI.lineItem: [{ position: 220 }]
+      NetAmount;
+      @UI.lineItem: [{ position: 230 }]
+      TransactionCurrency;
+}
+```
+
 🔹 Service Definition
 Cria uma definição de serviço OData com base na view de consumo.
 Exemplo: define service ZUI_MEUS_DADOS { expose ZC_MEUS_DADOS; }
