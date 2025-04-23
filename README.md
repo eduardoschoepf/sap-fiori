@@ -97,6 +97,77 @@ define view entity ZI_ITEMOV_ESCHOEPF
 View de consumo que expõe dados ao frontend, com anotações @UI, etc.
 Pode incluir filtros, formatação, labels e lógica de apresentação.
 
+```abap
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Ordem de Venda - Cabeçalho - ESCHOEPF'
+@Metadata.ignorePropagatedAnnotations: false
+@Metadata.allowExtensions: true
+define root view entity ZC_HEADEROV_ESCHOEPF
+  provider contract transactional_query
+    as projection on ZI_HEADEROV_ESCHOEPF
+{
+    @ObjectModel.text.element: [ 'SalesOrderType' ]
+    @UI.textArrangement: #TEXT_LAST
+    key SalesOrder           as SalesOrder,
+        SalesOrderType       as SalesOrderType,
+        CreatedByUser        as CreatedByUser,
+        LastChangedByUser    as LastChangedByUser,
+        CreationDate         as CreationDate,
+        SalesOrganization    as SalesOrganization,
+        DistributionChannel  as DistributionChannel,
+        OrganizationDivision as OrganizationDivision,
+        SalesGroup           as SalesGroup,
+        SalesOffice          as SalesOffice,   
+        TotalNetAmount       as TotalNetAmount,
+        TransactionCurrency  as TransactionCurrency,
+        Criticality          as Criticality, 
+        
+        _SalesOrderItem : redirected to composition child ZC_ITEMOV_ESCHOEPF
+}
+```
+
+```abap
+@AccessControl.authorizationCheck: #NOT_REQUIRED
+@EndUserText.label: 'Ordem de Vendas - Item -ESCHOEPF'
+@Metadata.ignorePropagatedAnnotations: false
+@Metadata.allowExtensions: true
+
+define view entity ZC_ITEMOV_ESCHOEPF 
+    as projection on ZI_ITEMOV_ESCHOEPF
+{
+    key SalesOrder             as SalesOrder,
+    key SalesOrderItem         as SalesOrderItem,
+        SalesOrderItemCategory as SalesOrderItemCategory,
+        SalesOrderItemType     as SalesOrderItemType,
+        IsReturnsItem          as IsReturnsItem,
+        CreatedByUser          as CreatedByUser,
+        CreationDate           as CreationDate,
+        CreationTime           as CreationTime,
+        LastChangeDate         as LastChangeDate,
+        Division               as Division,
+        Material               as Material,
+        Batch                  as Batch,
+        Plant                  as Plant,
+        StorageLocation        as StorageLocation,
+        @Semantics.quantity.unitOfMeasure: 'OrderQuantityUnit'
+        OrderQuantity          as OrderQuantity, 
+        OrderQuantityUnit      as OrderQuantityUnit,
+        @Semantics.quantity.unitOfMeasure: 'ItemWeightUnit'
+        ItemGrossWeight        as ItemGrossWeight,
+        @Semantics.quantity.unitOfMeasure: 'ItemWeightUnit'
+        ItemNetWeight          as ItemNetWeight,
+        ItemWeightUnit         as ItemWeightUnit,
+        @Semantics.quantity.unitOfMeasure: 'ItemVolumeUnit'
+        ItemVolume             as ItemVolume,
+        ItemVolumeUnit         as ItemVolumeUnit,
+        @Semantics.amount.currencyCode: 'TransactionCurrency'
+        NetAmount              as NetAmount,
+        TransactionCurrency    as TransactionCurrency,
+      
+        _SalesOrder   : redirected to parent ZC_HEADEROV_ESCHOEPF
+}
+```
+
 🔹 Service Definition
 Cria uma definição de serviço OData com base na view de consumo.
 Exemplo: define service ZUI_MEUS_DADOS { expose ZC_MEUS_DADOS; }
