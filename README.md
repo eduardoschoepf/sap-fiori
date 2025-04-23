@@ -335,7 +335,16 @@ Aqui o endpoint REST é gerado automaticamente.
 🔹 Behavior Definition (se for app transacional)
 Define operações suportadas: create, update, delete, draft, validation, actions, etc.
 Pode ser read-only ou implementar lógica customizada com classes ABAP.  
-Exemplo:  
+
+Exemplo: 
+```abap
+CLASS zbp_i_productroot_eschoepf DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zi_productroot_eschoepf.
+ENDCLASS.
+
+CLASS zbp_i_productroot_eschoepf IMPLEMENTATION.
+ENDCLASS.
+```
+
 ```abap
 // Início da implementação gerenciada de um behavior definition (definição de comportamento)
 managed implementation in class zbp_i_productroot_eschoepf unique;
@@ -403,8 +412,6 @@ define behavior for ZC_PRODUCTROOT_ESCHOEPF alias Products
   use delete;
 }
 ```
-🔹 Behavior Implementation (opcional)
-Implementa a lógica ABAP (métodos como create, modify, delete, etc.).
 
 🚀 Deploy e Teste no Fiori Launchpad
 Com o serviço ativo e anotado corretamente, o app Fiori Elements pode ser consumido via Launchpad (FLP), App Manager, ou integrado em catálogos.
