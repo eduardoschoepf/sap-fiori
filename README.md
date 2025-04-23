@@ -172,6 +172,14 @@ define view entity ZC_ITEMOV_ESCHOEPF
 Cria uma definição de serviço OData com base na view de consumo.
 Exemplo: define service ZUI_MEUS_DADOS { expose ZC_MEUS_DADOS; }
 
+```abap
+@EndUserText.label: 'Ordem de vendas'
+define service ZUI_SALESORDER_ESCHOEPF {
+  expose ZC_HEADEROV_ESCHOEPF as SalesOrder;
+  expose ZC_ITEMOV_ESCHOEPF   as SalesOrderItem;
+}
+```
+
 🔹 Service Binding
 Vincula o service definition a um canal de exposição (ex: OData V4).
 Aqui o endpoint REST é gerado automaticamente.
