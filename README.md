@@ -334,8 +334,75 @@ Aqui o endpoint REST é gerado automaticamente.
 
 🔹 Behavior Definition (se for app transacional)
 Define operações suportadas: create, update, delete, draft, validation, actions, etc.
-Pode ser read-only ou implementar lógica customizada com classes ABAP.
+Pode ser read-only ou implementar lógica customizada com classes ABAP.  
+Exemplo:  
+```abap
+// Início da implementação gerenciada de um behavior definition (definição de comportamento)
+managed implementation in class zbp_i_productroot_eschoepf unique;
 
+// Define que a implementação é *strict*, ou seja, segue regras mais rígidas de verificação (versão 2 das regras)
+strict ( 2 );
+
+// Define o *behavior* (comportamento) para a interface de dados ZI_PRODUCTROOT_ESCHOEPF
+define behavior for ZI_PRODUCTROOT_ESCHOEPF alias Products
+
+// Informa a tabela persistente que armazena os dados no banco de dados
+persistent table ztb_product_esch
+
+// Define o controle de bloqueio de registros como *master*, ou seja, ao editar um item, ele será bloqueado
+lock master
+
+// Controle de autorização no nível da instância (registro por registro)
+authorization master ( instance )
+
+// Define um campo para controle de concorrência otimista.
+// Isso evita que duas pessoas atualizem o mesmo registro ao mesmo tempo sem saber.
+// O campo 'LocalLastChangeAt' armazena a última data/hora de modificação do registro.
+// Antes de salvar uma alteração, o sistema verifica se o valor ainda é o mesmo.
+// Se alguém já tiver alterado o registro, a atualização é bloqueada para evitar perda de dados.
+etag master LocalLastChangeAt
+
+// Bloco de ações permitidas para essa entidade:
+// Isso define que os registros podem ser criados, atualizados e deletados via o serviço RAP
+{
+  create;   // Permite criar novos registros
+  update;   // Permite atualizar registros existentes
+  delete;   // Permite excluir registros
+
+
+  determination setProduct on modify { create; }
+  validation    checkNetWeight on save { field NetWeight; create; update; }
+
+  field ( numbering : managed, readonly ) ProductUuid;
+  field ( readonly ) Product;
+  field ( mandatory ) ProductDescription, Plant;
+
+  mapping for ztb_product_esch
+  {
+        ProductUuid        = product_uuid;
+        Product            = matnr;
+        Plant              = werks;
+        ProductDescription = maktx;
+        NetWeight          = ntgew;
+        WeightUnit         = gewei;
+        LastChangeBy       = last_changed_by;
+        LastChangeAt       = last_changed_at;
+        LocalLastChangeAt  = local_last_changed_at;
+  }
+}
+```
+
+```abap
+projection;
+strict ( 2 );
+
+define behavior for ZC_PRODUCTROOT_ESCHOEPF alias Products
+{
+  use create;
+  use update;
+  use delete;
+}
+```
 🔹 Behavior Implementation (opcional)
 Implementa a lógica ABAP (métodos como create, modify, delete, etc.).
 
