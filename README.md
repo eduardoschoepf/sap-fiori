@@ -1,6 +1,4 @@
-# GUIA FIORI – Projeto Ordem de Vendas (Sales Order)  
-
-## Visão Geral do Desenvolvimento RAP no Eclipse (ADT)
+# Visão Geral do Desenvolvimento RAP no Eclipse (ADT)
 🔹 Interface CDS (ZI_...)
 Define a estrutura de dados (campos, joins, associações).
 Essa view normalmente é baseada em tabelas do sistema ou views reutilizáveis.
