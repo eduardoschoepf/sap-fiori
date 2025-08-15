@@ -120,8 +120,7 @@ define view entity ZI_ITEMOV_ESCHOEPF
 }
 ```
 
-### 2.2 Consumption View (ZC_...)
-
+### 2.2 Consumption View (ZC_...)  
 Camada de projeção que expõe dados ao frontend (Fiori Elements), contendo anotações para UI, formatação e filtragem.  
 
 **Exemplo – Cabeçalho:**
@@ -153,6 +152,7 @@ define root view entity ZC_HEADEROV_ESCHOEPF
         _SalesOrderItem : redirected to composition child ZC_ITEMOV_ESCHOEPF
 }
 ```
+
 **Exemplo – Item:**
 ```abap
 @AccessControl.authorizationCheck: #NOT_REQUIRED
@@ -195,9 +195,9 @@ define view entity ZC_ITEMOV_ESCHOEPF
         _SalesOrder   : redirected to parent ZC_HEADEROV_ESCHOEPF
 }
 ```  
+---
 
-### 🎨 3. Configuração de UI (Metadata Extensions)
-
+## 🎨 3. Configuração de UI (Metadata Extensions)
 Usada para modularizar e centralizar a configuração da interface no Fiori Elements, sem poluir a CDS View principal.
 
 📌 Recomendada para manter o código limpo e reutilizável.
@@ -346,8 +346,9 @@ annotate entity ZC_ITEMOV_ESCHOEPF with
       TransactionCurrency;
 }
 ```
+---
 
-### 🌐 4. Exposição OData (Service Definition e Binding)
+## 🌐 4. Exposição OData (Service Definition e Binding)
 
 **Service Definition**
 Seleciona quais entidades (Consumption Views) serão expostas:
@@ -361,7 +362,7 @@ define service ZUI_SALESORDER_ESCHOEPF {
 
 **Service Binding**
 
-- Vincula a Service Definition a um protocolo (OData V4 recomendado)  
+- Vincula a Service Definition a um protocolo (OData V2/V4)  
 - Gera automaticamente o endpoint  
 - Após ativar, a URL é fornecida pelo sistema
 
@@ -453,12 +454,14 @@ define behavior for ZC_PRODUCTROOT_ESCHOEPF alias Products
 }
 
 ```
+---
 
-🚀 Deploy e Teste no Fiori Launchpad
+## 🚀 6. Deploy e Teste no Fiori Launchpad
 Com o serviço ativo e anotado corretamente, o app Fiori Elements pode ser consumido via Launchpad (FLP), App Manager, ou integrado em catálogos.  
 
+---
 
-## 📂 Estrutura genérica de arquivos no ABAP Development Tools (ADT)
+## 📂 7. Estrutura genérica de arquivos no ABAP Development Tools (ADT)
 ```
 /sap-fiori-elements
 │
@@ -484,6 +487,9 @@ Com o serviço ativo e anotado corretamente, o app Fiori Elements pode ser consu
         └── ZSB_EntityService    # Configuração do protocolo (OData V2/V4) e tipo (UI)
 
 ```
+
+---
+
 ## 🔑 Conclusão
 
 Seguindo essa sequência, garantimos:  
