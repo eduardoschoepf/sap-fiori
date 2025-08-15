@@ -1,18 +1,43 @@
-# Visão Geral do Desenvolvimento RAP no Eclipse (ADT)
-🔹 Interface CDS (ZI_...)
-Define a estrutura de dados (campos, joins, associações).
-Essa view normalmente é baseada em tabelas do sistema ou views reutilizáveis.
+# 🚀 Guia Prático de Desenvolvimento RAP no Eclipse (ADT) com Fiori Elements
 
+Este documento é um guia educacional sobre como criar aplicações **SAP Fiori Elements** usando o **RAP (Restful ABAP Programming Model)** no **ABAP Development Tools (ADT)**.
+
+---
+
+## 📖 1. Introdução
+
+O **RAP** é o modelo de programação ABAP orientado a serviços, projetado para criar APIs e aplicações SAP Fiori de forma declarativa, escalável e reutilizável.  
+Ele permite:
+- Criar **CDS Views** para modelagem de dados
+- Definir **comportamento** com Behavior Definitions
+- Expor dados via **OData Services**
+- Configurar **UI** diretamente no backend com anotações
+
+No desenvolvimento RAP com Fiori Elements, seguimos normalmente esta ordem:
+
+1. **Modelar os dados** (Interface e Consumption Views)
+2. **Definir apresentação** (Metadata Extensions)
+3. **Expor serviço** (Service Definition + Service Binding)
+4. **Definir comportamento** (Behavior Definition/Implementation)
+5. **Testar e publicar** (Fiori Launchpad/App Manager)
+
+---
+
+## 📂 2. Modelagem de Dados (CDS Views)
+
+As CDS Views (Core Data Services) representam a camada de dados e podem conter **anotações** que afetam como os dados serão exibidos e consumidos.
+
+### 2.1 Interface View (ZI\_...)
+Camada base que encapsula tabelas, define associações e estrutura principal dos dados.  
+Não é exposta diretamente ao frontend.
+
+**Exemplo – Cabeçalho:**
 ```abap
 @AbapCatalog.viewEnhancementCategory: [#NONE]
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Ordem de Vendas - Cabeçalho - Eduardo'
 @Metadata.ignorePropagatedAnnotations: true
-@ObjectModel.usageType:{
-    serviceQuality: #X,
-    sizeCategory: #S,
-    dataClass: #MIXED
-}
+@ObjectModel.usageType:{ serviceQuality: #X, sizeCategory: #S, dataClass: #MIXED }
 @Search.searchable: true
 
 define root view entity ZI_HEADEROV_ESCHOEPF 
@@ -42,8 +67,10 @@ define root view entity ZI_HEADEROV_ESCHOEPF
         
         _SalesOrderItem
 }
+
 ```
 
+**Exemplo – Item:**
 ```abap
 @AbapCatalog.viewEnhancementCategory: [#NONE]
 @AccessControl.authorizationCheck: #NOT_REQUIRED
@@ -93,10 +120,11 @@ define view entity ZI_ITEMOV_ESCHOEPF
 }
 ```
 
-🔹 Consumption CDS (ZC_...)
-View de consumo que expõe dados ao frontend, com anotações @UI, etc.
-Pode incluir filtros, formatação, labels e lógica de apresentação.
+### 2.2 Consumption View (ZC_...)
 
+Camada de projeção que expõe dados ao frontend (Fiori Elements), contendo anotações para UI, formatação e filtragem.  
+
+**Exemplo – Cabeçalho:**
 ```abap
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Ordem de Venda - Cabeçalho - ESCHOEPF'
@@ -125,7 +153,7 @@ define root view entity ZC_HEADEROV_ESCHOEPF
         _SalesOrderItem : redirected to composition child ZC_ITEMOV_ESCHOEPF
 }
 ```
-
+**Exemplo – Item:**
 ```abap
 @AccessControl.authorizationCheck: #NOT_REQUIRED
 @EndUserText.label: 'Ordem de Vendas - Item -ESCHOEPF'
@@ -166,12 +194,15 @@ define view entity ZC_ITEMOV_ESCHOEPF
       
         _SalesOrder   : redirected to parent ZC_HEADEROV_ESCHOEPF
 }
-```
+```  
 
-🔹 Metadata Extension (opcional, mas recomendado)
-Define as anotações de UI (como @UI.lineItem, @UI.selectionField, @UI.facet, etc.) separadamente da view principal.
-Ajuda a manter o código modular, limpo e reutilizável.
+### 🎨 3. Configuração de UI (Metadata Extensions)
 
+Usada para modularizar e centralizar a configuração da interface no Fiori Elements, sem poluir a CDS View principal.
+
+📌 Recomendada para manter o código limpo e reutilizável.
+
+**Exemplo – Cabeçalho:**
 ```abap
 @Metadata.layer: #CORE
 @UI.headerInfo: { typeName: 'Pedidos de compra',
@@ -262,6 +293,7 @@ annotate entity ZC_HEADEROV_ESCHOEPF
 }
 ```
 
+**Exemplo – Item:**
 ```abap
 @Metadata.layer: #CORE
 annotate entity ZC_ITEMOV_ESCHOEPF with
@@ -315,10 +347,10 @@ annotate entity ZC_ITEMOV_ESCHOEPF with
 }
 ```
 
-🔹 Service Definition
-Cria uma definição de serviço OData com base na view de consumo.
-Exemplo: define service ZUI_MEUS_DADOS { expose ZC_MEUS_DADOS; }
+### 🌐 4. Exposição OData (Service Definition e Binding)
 
+**Service Definition**
+Seleciona quais entidades (Consumption Views) serão expostas:
 ```abap
 @EndUserText.label: 'Ordem de vendas'
 define service ZUI_SALESORDER_ESCHOEPF {
@@ -327,16 +359,24 @@ define service ZUI_SALESORDER_ESCHOEPF {
 }
 ```
 
-🔹 Service Binding
-Vincula o service definition a um canal de exposição (ex: OData V4).
-Aqui o endpoint REST é gerado automaticamente.
-→ Após ativar, você recebe a URL do serviço OData.
+**Service Binding**
 
-🔹 Behavior Definition (se for app transacional)
-Define operações suportadas: create, update, delete, draft, validation, actions, etc.
-Pode ser read-only ou implementar lógica customizada com classes ABAP.  
+- Vincula a Service Definition a um protocolo (OData V4 recomendado)  
+- Gera automaticamente o endpoint  
+- Após ativar, a URL é fornecida pelo sistema
 
-Exemplo: 
+---
+
+## ⚙️ 5. Definição de Comportamento (Behavior Definition & Implementation)
+
+Necessária em **apps transacionais** (CRUD).  
+Permite configurar:
+- Operações permitidas (create, update, delete)
+- Validações
+- Determinações
+- Controle de concorrência
+
+**Exemplo Behavior Definition:**
 ```abap
 CLASS zbp_i_productroot_eschoepf DEFINITION PUBLIC ABSTRACT FINAL FOR BEHAVIOR OF zi_productroot_eschoepf.
 ENDCLASS.
@@ -411,7 +451,36 @@ define behavior for ZC_PRODUCTROOT_ESCHOEPF alias Products
   use update;
   use delete;
 }
+
 ```
 
 🚀 Deploy e Teste no Fiori Launchpad
-Com o serviço ativo e anotado corretamente, o app Fiori Elements pode ser consumido via Launchpad (FLP), App Manager, ou integrado em catálogos.
+Com o serviço ativo e anotado corretamente, o app Fiori Elements pode ser consumido via Launchpad (FLP), App Manager, ou integrado em catálogos.  
+
+
+## 📂 Estrutura genérica de arquivos no ABAP Development Tools (ADT)
+```
+/sap-fiori-elements
+│
+├── /Dictionary
+│   └── /Database Tables         # Tabelas com campos persistentes que representam as entidades de negócio
+│
+├── /Core Data Services
+│   ├── /Data Definitions        # CDS Views (Interface + Consumption)
+│   │   ├── ZI_Entity            # Interface View: encapsula as tabelas e define associações (`association [0..*] to`)
+│   │   └── ZC_Entity            # Consumption View: camada de projeção (projeta os dados para o consumo)
+│   │
+│   ├── /Behavior Definitions    # Comportamento das entidades RAP
+│   │   └──  ZI_Entity           # Behavior Definition (CRUD, validações simples)
+│   │
+│   └── /Metadata Extensions     # Anotações UI (@UI)
+│       └── ZC_Entity            # Define, por meio de anotações `@UI`, como os dados serão exibidos na interface (@UI.lineItem, @UI.FieldGroup, etc.)
+│
+└── /Business Services
+    ├── /Service Definitions     # Exposição OData
+    │   └── ZSD_EntityService    # Exposição das CDS Views como entidades OData
+    │
+    └── /Service Bindings        # Ativação do serviço
+        └── ZSB_EntityService    # Configuração do protocolo (OData V2/V4) e tipo (UI)
+
+```
